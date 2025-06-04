@@ -23,6 +23,73 @@ frame.grid_columnconfigure(1, weight=1)
 # Variable global para almacenar todos los datos originales
 datos_originales = []
 
+# Funciones
+
+# Función para mostrar imagen al seleccionar un producto
+def mostrar_imagen_producto(event):
+    selected_item = tabla_tree.selection()
+    
+    if not selected_item:
+        return
+    
+    valores = tabla_tree.item(selected_item)["values"]
+    codigo_producto = valores[0]  
+    
+    # Buscar la imagen en el directorio
+    directorio_imagenes = "imagenes"
+    if not os.path.exists(directorio_imagenes):
+        os.makedirs(directorio_imagenes)
+    
+    # Buscar cualquier archivo con el nombre del código del producto
+    imagen_encontrada = False
+    for extension in ['.png', '.jpg', '.jpeg', '.gif']:
+        ruta_imagen = os.path.join(directorio_imagenes, f"{codigo_producto}{extension}")
+        if os.path.exists(ruta_imagen):
+            try:
+                # Cargar y mostrar la imagen
+                imagen = Image.open(ruta_imagen)
+                imagen = imagen.resize((200, 200))
+                imagen_tk = ImageTk.PhotoImage(imagen)
+                
+                # Mostrar la imagen en el label
+                label_imagen.config(image=imagen_tk)
+                label_imagen.image = imagen_tk 
+                imagen_encontrada = True
+                break
+            except Exception as e:
+                print(f"ERROR AL CARGAR LA IMAGEN {ruta_imagen}: {e}")
+    
+    if not imagen_encontrada:
+        label_imagen.config(image="", text="IMAGEN\nNO DISPONIBLE")
+
+# Función para buscar productos por código o nombre
+def buscar_producto(event=None):
+    termino_busqueda = busqueda_entry.get().lower().strip()
+    
+    for item in tabla_tree.get_children():
+        tabla_tree.delete(item)
+    
+    # Si no hay término de búsqueda, mostrar todos los datos
+    if not termino_busqueda:
+        for datos in datos_originales:
+            tabla_tree.insert("", "end", values=datos)
+        return
+    
+    # Filtrar datos que coincidan con el valor de búsqueda
+    resultados_encontrados = False
+    for datos in datos_originales:
+        codigo = str(datos[0]).lower()
+        nombre = str(datos[1]).lower()
+        
+        # Buscar a través de un código o nombre
+        if termino_busqueda in codigo or termino_busqueda in nombre:
+            tabla_tree.insert("", "end", values=datos)
+            resultados_encontrados = True
+    
+    # Si no se encontraron resultados, mostrar el mensaje
+    if not resultados_encontrados and termino_busqueda:
+        tabla_tree.insert("", "end", values=("", "NO RESULTADOS", "", "", "", "", ""))
+
 # Función Actualizar el documento Excel
 def actualizar_excel():
     try:
@@ -257,5 +324,19 @@ scrollbar_y.config(command=tabla_tree.yview)
 scrollbar_x.config(command=tabla_tree.xview)
 scrollbar_y.grid(row=0, column=1, sticky="ns")
 scrollbar_x.grid(row=1, column=0, sticky="ew")
+
+# Frame de Búsqueda:
+
+busqueda_Frame = tkinter.LabelFrame(frame, font=("Verdana", 12, "bold"), text="BÚSQUEDA DE PRODUCTOS")
+busqueda_Frame.grid(row=2, column=1, padx=5, pady=(0, 20), sticky="ew")
+
+busqueda_Frame.grid_columnconfigure(1, weight=1)
+
+busqueda_label = tkinter.Label(busqueda_Frame, font=("Roboto", 10, "bold"), text="CÓDIGO O NOMBRE DEL PRODUCTO:")
+busqueda_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
+
+busqueda_entry = tkinter.Entry(busqueda_Frame, font=("Roboto", 10), width=40)
+busqueda_entry.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
+busqueda_entry.bind('<KeyRelease>', buscar_producto)  # Búsqueda en tiempo real
 
 ventana.mainloop()
