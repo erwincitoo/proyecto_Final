@@ -84,13 +84,10 @@ def buscar_productos():
 
 # Función agregar productos al carrito
 def agregar_producto_al_carrito():
-    """
-    Esta función agrega un producto seleccionado al carrito
-    """
     # Verificar que haya un producto seleccionado
     seleccion = tabla_productos.selection()
     if len(seleccion) == 0:
-        messagebox.showwarning("ADVERTENCIA", "Por favor selecciona un producto")
+        messagebox.showwarning("ADVERTENCIA", "POR FAVOR SELECCIONA UN PRODUCTO")
         return
     
     # Obtener la cantidad ingresada
@@ -98,12 +95,12 @@ def agregar_producto_al_carrito():
     
     # Verificar que la cantidad sea válida
     if texto_cantidad.isdigit() == False:
-        messagebox.showwarning("ADVERTENCIA", "Ingresa una cantidad válida (solo números)")
+        messagebox.showwarning("ADVERTENCIA", "INGRESA UNA CANTIDAD VALIDA (SOLO NÚMEROS)")
         return
     
     cantidad_deseada = int(texto_cantidad)
     if cantidad_deseada <= 0:
-        messagebox.showwarning("ADVERTENCIA", "La cantidad debe ser mayor a 0")
+        messagebox.showwarning("ADVERTENCIA", "LA CANTIDAD DEBE SER MAYOR A 0")
         return
     
     # Obtener los datos del producto seleccionado
@@ -226,7 +223,7 @@ def finalizar_compra():
         return
     
     # Creación de la compra
-    texto_factura = "========== FACTURA ==========\n\n"
+    texto_factura = "-------FACTURA------\n\n"
     total_final = 0
     
     contador = 0
@@ -334,7 +331,7 @@ def crear_interfaz():
     entrada_cantidad = tk.Entry(frame_agregar, font=("Arial", 12), width=10)
     entrada_cantidad.pack(side="left", padx=5)
     
-    boton_agregar = tk.Button(frame_agregar, text="AGREGAR AL CARRITO", font=("Arial", 12, "bold"))
+    boton_agregar = tk.Button(frame_agregar, text="AGREGAR AL CARRITO", font=("Arial", 12, "bold"), command=agregar_producto_al_carrito)
     boton_agregar.pack(side="left", padx=20)
     
 
@@ -368,7 +365,7 @@ def crear_interfaz():
     frame_botones.grid(row=3, column=0, pady=10, sticky="ew")
     
     # Botón quitar del carrito
-    boton_quitar = tk.Button(frame_botones, text="QUITAR DEL CARRITO", font=("Arial", 12, "bold"))
+    boton_quitar = tk.Button(frame_botones, text="QUITAR DEL CARRITO", font=("Arial", 12, "bold"), command=quitar_producto_del_carrito)
     boton_quitar.pack(side="left", padx=5)
     
     # Etiqueto de precio a pagar
@@ -376,11 +373,11 @@ def crear_interfaz():
     etiqueta_total.pack(side="left", padx=50)
     
     # Botón finalizar compra
-    boton_finalizar = tk.Button(frame_botones, text="FINALIZAR COMPRA", font=("Arial", 12, "bold"))
+    boton_finalizar = tk.Button(frame_botones, text="FINALIZAR COMPRA", font=("Arial", 12, "bold"), command=finalizar_compra)
     boton_finalizar.pack(side="right", padx=5)
     
     # Botón cancelar compra
-    boton_cancelar = tk.Button(frame_botones, text="CANCELAR COMPRA", font=("Arial", 12, "bold"))
+    boton_cancelar = tk.Button(frame_botones, text="CANCELAR COMPRA", font=("Arial", 12, "bold"), command=cancelar_compra)
     boton_cancelar.pack(side="right", padx=5)
 
 # Función Principal:
