@@ -2,6 +2,11 @@ from tkinter import ttk, messagebox, filedialog
 import tkinter
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+import os
+import shutil
+from PIL import ImageTk, Image
+import pandas as pd
+import traceback
 
 ventana = ttk.Window(themename="yeti")
 ventana.title("BASE DE DATOS - FARMACIA")
@@ -15,6 +20,119 @@ frame.grid_rowconfigure(0, weight=1)
 frame.grid_rowconfigure(1, weight=0)  
 frame.grid_columnconfigure(1, weight=1)
 
+# Variable global para almacenar todos los datos originales
+datos_originales = []
+
+# Función Actualizar el documento Excel
+def actualizar_excel():
+    try:
+        # Usar datos_originales en lugar de los datos de la tabla (que pueden estar filtrados)
+        columnas = ["CÓDIGO", "NOMBRE", "TIPO", "CATEGORÍA", "LOTE", "CANTIDAD", "PRECIO"]
+        df = pd.DataFrame(datos_originales, columns=columnas)
+        
+        print(f"ACTUALIZANDO EXCEL CON {len(datos_originales)} REGISTROS")
+        
+        # Guardar Excel
+        df.to_excel("datos_farmacia.xlsx", index=False)
+        print("EXCEL ACTUALIZADO CORRECTAMENTE")
+        
+    except Exception as e:
+      
+        print(traceback.format_exc()) 
+        messagebox.showerror("ERROR", f"NO SE PUDO ACTUALIZAR EL ARCHIVO EXCEL: {str(e)}")
+
+# Función para cargar los datos de Excel
+def cargar_datos_excel():
+    global datos_originales
+    if os.path.exists("datos_farmacia.xlsx"):
+        df = pd.read_excel("datos_farmacia.xlsx")
+        datos_originales = []
+        for _, fila in df.iterrows():
+            valores = tuple(fila)
+            tabla_tree.insert("", "end", values=valores)
+            datos_originales.append(valores)
+    else:
+        messagebox.showwarning("ADVERTENCIA", "ARCHIVO 'datos_farmacia.xlsx' NO ENCONTRADO.")
+
+
+# Función para actualizar los datos en la base de datos:
+def actualizar_datos(selected_item, valores_originales):
+    codigo = codigo_entry.get()
+    nombre = nombre_entry.get()
+    tipo = tipo_entry.get()
+    categoria = categoria_combobox.get()
+    lote = lote_entry.get()
+    cantidad = cantidad_entry.get()
+    precio = precio_entry.get()
+
+    if codigo and nombre and tipo and categoria and lote and cantidad and precio:
+        nuevos_valores = (codigo, nombre, tipo, categoria, lote, cantidad, precio)
+        tabla_tree.item(selected_item, values=nuevos_valores)
+        
+        for i, datos in enumerate(datos_originales):
+            if datos == valores_originales:
+                datos_originales[i] = nuevos_valores
+                break
+        
+        limpiar_campos()
+        guardar_button.config(text="GUARDAR")
+        
+        actualizar_excel()
+        
+    else:
+        messagebox.showwarning("ADVERTENCIA", "POR FAVOR, COMPLETE TODOS LOS CAMPOS.")
+
+# Función que vacía los datos de los campos de ingreso de datos:
+def limpiar_campos():
+    codigo_entry.delete(0, tkinter.END)
+    nombre_entry.delete(0, tkinter.END)
+    tipo_entry.delete(0, tkinter.END)
+    categoria_combobox.set("")
+    lote_entry.delete(0, tkinter.END)
+    cantidad_entry.delete(0, tkinter.END)
+    precio_entry.delete(0, tkinter.END)
+
+# Función para mostrar las imagenes de los productos
+def cargar_imagen():
+    selected_item = tabla_tree.selection()
+    
+    if not selected_item:
+        messagebox.showwarning("ADVERTENCIA", "SELECCIONE UN PRODUCTO PRIMERO.")
+        return
+    
+    valores = tabla_tree.item(selected_item)["values"]
+    
+    if valores[1] == "NO SE ENCONTRARON RESULTADOS":
+        messagebox.showwarning("ADVERTENCIA", "SELECCIONE UN PRODUCTO VÁLIDO.")
+        return
+    
+    codigo_producto = valores[0]  
+    
+    # Pedir al usuario seleccionar una imagen
+    ruta_imagen = filedialog.askopenfilename(filetypes=[("Imágenes", "*.png *.jpg *.jpeg *.gif")])
+    
+    if ruta_imagen:
+        directorio_imagenes = "imagenes"
+        if not os.path.exists(directorio_imagenes):
+            os.makedirs(directorio_imagenes)
+        _, extension = os.path.splitext(ruta_imagen)
+        
+        # Crear nombre de archivo basado en el código del producto
+        nombre_archivo = os.path.join(directorio_imagenes, f"{codigo_producto}{extension}")
+        
+        # Copiar la imagen al directorio de imágenes con el nombre del código
+        shutil.copy2(ruta_imagen, nombre_archivo)
+        
+        # Cargar y mostrar la imagen
+        imagen = Image.open(nombre_archivo)
+        imagen = imagen.resize((200, 200))
+        imagen_tk = ImageTk.PhotoImage(imagen)
+        
+        # Mostrar la imagen en el label
+        label_imagen.config(image=imagen_tk, text="")
+        label_imagen.image = imagen_tk  
+        
+        messagebox.showinfo("ÉXITO", f"IMAGEN ASOCIADA AL PRODUCTO {codigo_producto}")
 
 # Inicio Frame:
 
@@ -97,7 +215,7 @@ container_imagen.grid(row=1, column=0, padx=10, pady=10)
 container_imagen.pack_propagate(False)  # Mantener tamaño fijo
 
 # Label para mostrar la imagen dentro del contenedor
-label_imagen = tkinter.Label(container_imagen, bg="light gray", text="IMAGEN NO\nDISPONIBLE")
+label_imagen = tkinter.Label(container_imagen, bg="light gray", text="IMÁGEN NO\nDISPONIBLE")
 label_imagen.pack(expand=True, fill="both")
 
 
