@@ -1,7 +1,62 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+import os 
+import pandas as pd
+
+# Lista para guardar todos los productos de la farmacia
+lista_productos = []
+
+# Lista para guardar los productos que el cliente quiere comprar
+lista_carrito = []
+
+# Función para cargar datos desde Excel
+def cargar_productos_desde_excel():
+    # Verificar si el archivo existe
+    if os.path.exists("datos_farmacia.xlsx") == False:
+        messagebox.showerror("ERROR", "El archivo datos_farmacia.xlsx no se encontró.")
+        return False
+    
+    datos_excel = pd.read_excel("datos_farmacia.xlsx")
+    
+    contador = 0
+    while contador < len(datos_excel):
+        fila_actual = datos_excel.iloc[contador]
+        
+        producto_nuevo = {}
+        producto_nuevo["codigo"] = fila_actual["CÓDIGO"]
+        producto_nuevo["nombre"] = fila_actual["NOMBRE"]
+        producto_nuevo["precio"] = fila_actual["PRECIO"]
+        producto_nuevo["cantidad"] = int(fila_actual["CANTIDAD"])
+        
+        lista_productos.append(producto_nuevo)
+        
+        contador = contador + 1
+    
+    numero_productos = len(lista_productos)
+    mensaje = "Se cargaron " + str(numero_productos) + " productos correctamente"
+    print(mensaje)
+    return True
 
 
+# Función mostrar los productos
+def mostrar_todos_los_productos():
+    
+    tabla_productos.delete(*tabla_productos.get_children())
+    
+    contador = 0
+    while contador < len(lista_productos):
+        producto = lista_productos[contador]
+        
+        # Determina si el producto está disponible
+        if producto["cantidad"] == 0:
+            etiqueta_estado = "agotado"
+        else:
+            etiqueta_estado = ""
+        
+        valores = (producto["codigo"], producto["nombre"], producto["precio"], producto["cantidad"])
+        tabla_productos.insert("", "end", values=valores, tags=(etiqueta_estado,))
+        
+        contador = contador + 1
 
 def crear_interfaz():
     global ventana_principal, tabla_productos, tabla_carrito
@@ -103,8 +158,14 @@ def crear_interfaz():
 
 # Función Principal:
 def main():
-    
+    # Cargar los productos desde Excel
+    resultado = cargar_productos_desde_excel()
+    if resultado == False:
+        print("ERROR: NO SE PUDIERON CARGAR LOS PRODUCTOS")
+        return
+
     crear_interfaz()
+    mostrar_todos_los_productos()
     ventana_principal.mainloop()
 
 if __name__ == "__main__":
