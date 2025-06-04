@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 
+
+
 def crear_interfaz():
-    global ventana_principal, tabla_productos
+    global ventana_principal, tabla_productos, tabla_carrito
     
     # Creación de la ventana principal
     ventana_principal = tk.Tk()
@@ -41,6 +43,63 @@ def crear_interfaz():
     tabla_productos.tag_configure("AGOTADO", background="#ffdddd", foreground="red")
     
     tabla_productos.pack(padx=5, pady=5, fill="both", expand=True)
+
+
+    frame_agregar = tk.Frame(frame_principal)
+    frame_agregar.grid(row=1, column=0, pady=10, sticky="ew")
+    
+    tk.Label(frame_agregar, text="CANTIDAD:", font=("Arial", 12, "bold")).pack(side="left", padx=5)
+    entrada_cantidad = tk.Entry(frame_agregar, font=("Arial", 12), width=10)
+    entrada_cantidad.pack(side="left", padx=5)
+    
+    boton_agregar = tk.Button(frame_agregar, text="AGREGAR AL CARRITO", font=("Arial", 12, "bold"))
+    boton_agregar.pack(side="left", padx=20)
+    
+
+    # Frame del carrito
+    
+    frame_carrito = tk.LabelFrame(frame_principal, text="CARRITO DE COMPRAS", font=("Arial", 12, "bold"))
+    frame_carrito.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+    
+    # Tabla del carrito
+    columnas_carrito = ("CÓDIGO", "NOMBRE", "PRECIO", "CANTIDAD", "SUBTOTAL")
+    tabla_carrito = ttk.Treeview(frame_carrito, columns=columnas_carrito, show="headings", height=8)
+    
+    # Configurar columnas del carrito
+    tabla_carrito.heading("CÓDIGO", text="CÓDIGO")
+    tabla_carrito.heading("NOMBRE", text="NOMBRE")
+    tabla_carrito.heading("PRECIO", text="PRECIO (Bs.)")
+    tabla_carrito.heading("CANTIDAD", text="CANTIDAD")
+    tabla_carrito.heading("SUBTOTAL", text="SUBTOTAL (Bs.)")
+    
+    tabla_carrito.column("CÓDIGO", width=80, anchor="center")
+    tabla_carrito.column("NOMBRE", width=180, anchor="center")
+    tabla_carrito.column("PRECIO", width=100, anchor="center")
+    tabla_carrito.column("CANTIDAD", width=80, anchor="center")
+    tabla_carrito.column("SUBTOTAL", width=120, anchor="center")
+    
+    tabla_carrito.pack(padx=5, pady=5, fill="both", expand=True)
+
+    # Botones
+    
+    frame_botones = tk.Frame(frame_principal)
+    frame_botones.grid(row=3, column=0, pady=10, sticky="ew")
+    
+    # Botón quitar del carrito
+    boton_quitar = tk.Button(frame_botones, text="QUITAR DEL CARRITO", font=("Arial", 12, "bold"))
+    boton_quitar.pack(side="left", padx=5)
+    
+    # Etiqueto de precio a pagar
+    etiqueta_total = tk.Label(frame_botones, text="TOTAL A PAGAR: Bs. 0.00", font=("Arial", 14, "bold"), fg="blue")
+    etiqueta_total.pack(side="left", padx=50)
+    
+    # Botón finalizar compra
+    boton_finalizar = tk.Button(frame_botones, text="FINALIZAR COMPRA", font=("Arial", 12, "bold"))
+    boton_finalizar.pack(side="right", padx=5)
+    
+    # Botón cancelar compra
+    boton_cancelar = tk.Button(frame_botones, text="CANCELAR COMPRA", font=("Arial", 12, "bold"))
+    boton_cancelar.pack(side="right", padx=5)
 
 # Función Principal:
 def main():
