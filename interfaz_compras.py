@@ -95,7 +95,7 @@ def agregar_producto_al_carrito():
     
     # Verificar que la cantidad sea válida
     if texto_cantidad.isdigit() == False:
-        messagebox.showwarning("ADVERTENCIA", "INGRESA UNA CANTIDAD VALIDA (SOLO NÚMEROS)")
+        messagebox.showwarning("ADVERTENCIA", "INGRESA UNA CANTIDAD VALIDA (SOLO NÚMEROS POSITIVOS)")
         return
     
     cantidad_deseada = int(texto_cantidad)
